@@ -1,0 +1,17 @@
+# Pilote PostgreSQL (v3, binaire pour éviter la compilation sous Windows)
+psycopg[binary]>=3.2,<4
+
+# Chargement des variables d'environnement (.env)
+python-dotenv>=1.0
+
+# Manipulation des résultats de benchmark
+pandas>=2.2
+
+# Graphiques avant/après
+matplotlib>=3.9
+
+# Rendu de tableaux Markdown (résumés de benchmark)
+tabulate>=0.9
+
+# Dashboard (stretch goal)
+streamlit>=1.40

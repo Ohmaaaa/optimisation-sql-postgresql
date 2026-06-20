@@ -1,0 +1,41 @@
+# -----------------------------------------------------------------------------
+# Alternative 100 % reproductible : PostgreSQL 17 dans un conteneur.
+#
+# Le projet a été développé sur une installation PostgreSQL native (Windows),
+# mais ce fichier permet de rejouer l'intégralité du benchmark sur n'importe
+# quelle machine disposant de Docker, sans rien installer :
+#
+#     docker compose -f docker/docker-compose.yml up -d
+#     # puis charger le schéma et les données :
+#     docker exec -i optisql_pg psql -U postgres -d ecommerce < sql/01_schema.sql
+#     ...
+#
+# -----------------------------------------------------------------------------
+services:
+  db:
+    image: postgres:17
+    container_name: optisql_pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../sql:/sql:ro
+    # Tuning léger pour un poste de développement.
+    # Ajuste shared_buffers / work_mem selon la RAM disponible.
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=512MB"
+      - "-c"
+      - "work_mem=64MB"
+      - "-c"
+      - "maintenance_work_mem=256MB"
+      - "-c"
+      - "random_page_cost=1.1"   # disque SSD
+
+volumes:
+  pgdata:

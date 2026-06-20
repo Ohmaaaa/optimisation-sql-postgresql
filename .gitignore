@@ -1,0 +1,24 @@
+# Environnement Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets / configuration locale
+.env
+
+# Logs et fichiers temporaires
+*.log
+*.tmp
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Remarque : results/ (figures, plans EXPLAIN, benchmarks.json) est VOLONTAIREMENT
+# versionné car il fait partie du rapport.
