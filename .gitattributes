@@ -1,0 +1,7 @@
+# Normalisation des fins de ligne (cohérence cross-plateforme)
+* text=auto eol=lf
+
+# Fichiers binaires : pas de conversion
+*.png  binary
+*.jpg  binary
+*.pdf  binary
