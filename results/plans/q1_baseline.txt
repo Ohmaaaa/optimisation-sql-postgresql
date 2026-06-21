@@ -1,0 +1,59 @@
+Finalize GroupAggregate  (cost=17293.18..17294.09 rows=3 width=36) (actual time=36.112..49.212 rows=2 loops=1)
+  Output: co.id, sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise)))
+  Group Key: co.id
+  Buffers: shared hit=8374 read=922
+  ->  Gather Merge  (cost=17293.18..17294.00 rows=6 width=36) (actual time=36.108..49.207 rows=2 loops=1)
+        Output: co.id, (PARTIAL sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise))))
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=8374 read=922
+        ->  Partial GroupAggregate  (cost=16293.16..16293.29 rows=3 width=36) (actual time=24.999..25.000 rows=1 loops=3)
+              Output: co.id, PARTIAL sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise)))
+              Group Key: co.id
+              Buffers: shared hit=8374 read=922
+              Worker 0:  actual time=19.812..19.813 rows=0 loops=1
+                Buffers: shared hit=2066
+              Worker 1:  actual time=19.233..19.234 rows=1 loops=1
+                Buffers: shared hit=2002
+              ->  Sort  (cost=16293.16..16293.17 rows=5 width=17) (actual time=24.992..24.993 rows=2 loops=3)
+                    Output: co.id, lc.quantite, lc.prix_unitaire, lc.remise
+                    Sort Key: co.id
+                    Sort Method: quicksort  Memory: 25kB
+                    Buffers: shared hit=8374 read=922
+                    Worker 0:  actual time=19.811..19.812 rows=0 loops=1
+                      Sort Method: quicksort  Memory: 25kB
+                      Buffers: shared hit=2066
+                    Worker 1:  actual time=19.221..19.222 rows=6 loops=1
+                      Sort Method: quicksort  Memory: 25kB
+                      Buffers: shared hit=2002
+                    ->  Parallel Hash Join  (cost=3697.26..16293.10 rows=5 width=17) (actual time=18.161..24.969 rows=2 loops=3)
+                          Output: co.id, lc.quantite, lc.prix_unitaire, lc.remise
+                          Inner Unique: true
+                          Hash Cond: (lc.commande_id = co.id)
+                          Buffers: shared hit=8302 read=922
+                          Worker 0:  actual time=19.778..19.779 rows=0 loops=1
+                            Buffers: shared hit=2030
+                          Worker 1:  actual time=13.216..19.189 rows=6 loops=1
+                            Buffers: shared hit=1966
+                          ->  Parallel Seq Scan on public.lignes_commande lc  (cost=0.00..11503.65 rows=416065 width=17) (actual time=0.005..8.824 rows=332852 loops=3)
+                                Output: lc.id, lc.commande_id, lc.produit_id, lc.quantite, lc.prix_unitaire, lc.remise
+                                Buffers: shared hit=6421 read=922
+                                Worker 0:  actual time=0.008..7.665 rows=274584 loops=1
+                                  Buffers: shared hit=2019
+                                Worker 1:  actual time=0.005..7.483 rows=265788 loops=1
+                                  Buffers: shared hit=1955
+                          ->  Parallel Hash  (cost=3697.24..3697.24 rows=2 width=4) (actual time=2.370..2.371 rows=1 loops=3)
+                                Output: co.id
+                                Buckets: 1024  Batches: 1  Memory Usage: 40kB
+                                Buffers: shared hit=1859
+                                Worker 0:  actual time=0.009..0.009 rows=0 loops=1
+                                Worker 1:  actual time=0.008..0.008 rows=0 loops=1
+                                ->  Parallel Seq Scan on public.commandes co  (cost=0.00..3697.24 rows=2 width=4) (actual time=0.413..7.089 rows=2 loops=1)
+                                      Output: co.id
+                                      Filter: (co.client_id = 12345)
+                                      Rows Removed by Filter: 249998
+                                      Buffers: shared hit=1859
+Planning:
+  Buffers: shared hit=8
+Planning Time: 0.110 ms
+Execution Time: 49.231 ms

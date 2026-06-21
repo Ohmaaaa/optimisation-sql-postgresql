@@ -1,0 +1,20 @@
+Finalize Aggregate  (cost=5800.30..5800.31 rows=1 width=8) (actual time=113.511..125.592 rows=1 loops=1)
+  Output: count(*)
+  Buffers: shared hit=1859
+  ->  Gather  (cost=5800.19..5800.30 rows=1 width=8) (actual time=26.016..125.587 rows=2 loops=1)
+        Output: (PARTIAL count(*))
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=1859
+        ->  Partial Aggregate  (cost=4800.19..4800.20 rows=1 width=8) (actual time=12.962..12.962 rows=1 loops=2)
+              Output: PARTIAL count(*)
+              Buffers: shared hit=1859
+              Worker 0:  actual time=0.003..0.004 rows=1 loops=1
+              ->  Parallel Seq Scan on public.commandes  (cost=0.00..4800.18 rows=4 width=0) (actual time=0.006..12.892 rows=2996 loops=2)
+                    Output: id, client_id, date_commande, statut, canal
+                    Filter: ((EXTRACT(year FROM commandes.date_commande) = '2024'::numeric) AND (EXTRACT(month FROM commandes.date_commande) = '6'::numeric))
+                    Rows Removed by Filter: 122004
+                    Buffers: shared hit=1859
+                    Worker 0:  actual time=0.001..0.001 rows=0 loops=1
+Planning Time: 0.051 ms
+Execution Time: 125.603 ms

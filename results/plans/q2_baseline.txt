@@ -1,0 +1,16 @@
+Seq Scan on public.clients c  (cost=0.00..8515590.89 rows=1708 width=19) (actual time=6.488..11338.986 rows=1754 loops=1)
+  Output: c.id, c.nom, (SubPlan 1)
+  Filter: ((c.segment = 'vip'::text) AND (c.ville = 'Paris'::text))
+  Rows Removed by Filter: 98246
+  Buffers: shared hit=3262075
+  SubPlan 1
+    ->  Aggregate  (cost=4984.01..4984.02 rows=1 width=8) (actual time=6.460..6.460 rows=1 loops=1754)
+          Output: count(*)
+          Buffers: shared hit=3260686
+          ->  Seq Scan on public.commandes co  (cost=0.00..4984.00 rows=3 width=0) (actual time=2.271..6.457 rows=3 loops=1754)
+                Output: co.id, co.client_id, co.date_commande, co.statut, co.canal
+                Filter: (co.client_id = c.id)
+                Rows Removed by Filter: 249997
+                Buffers: shared hit=3260686
+Planning Time: 0.062 ms
+Execution Time: 11339.138 ms

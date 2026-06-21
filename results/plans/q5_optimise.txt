@@ -1,0 +1,8 @@
+Limit  (cost=0.28..1.12 rows=10 width=35) (actual time=0.002..0.004 rows=10 loops=1)
+  Output: id, nom, ca
+  Buffers: shared hit=12
+  ->  Index Scan using idx_mv_ca_produit_ca on public.mv_ca_produit  (cost=0.28..419.18 rows=5000 width=35) (actual time=0.002..0.003 rows=10 loops=1)
+        Output: id, nom, ca
+        Buffers: shared hit=12
+Planning Time: 0.007 ms
+Execution Time: 0.005 ms

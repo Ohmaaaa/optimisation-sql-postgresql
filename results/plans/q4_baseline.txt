@@ -1,0 +1,17 @@
+Aggregate  (cost=71796946.75..71796946.76 rows=1 width=8) (actual time=1020.813..1020.814 rows=1 loops=1)
+  Output: count(*)
+  Buffers: shared hit=391
+  ->  Seq Scan on public.produits  (cost=0.00..71796940.50 rows=2500 width=0) (actual time=1020.810..1020.811 rows=0 loops=1)
+        Output: produits.id, produits.nom, produits.categorie, produits.prix, produits.cout, produits.actif, produits.date_ajout
+        Filter: (NOT (ANY (produits.id = (SubPlan 1).col1)))
+        Rows Removed by Filter: 5000
+        Buffers: shared hit=391
+        SubPlan 1
+          ->  Materialize  (cost=0.00..26222.34 rows=998556 width=4) (actual time=0.000..0.077 rows=5042 loops=5000)
+                Output: lignes_commande.produit_id
+                Buffers: shared hit=338
+                ->  Seq Scan on public.lignes_commande  (cost=0.00..17328.56 rows=998556 width=4) (actual time=0.003..1.455 rows=45779 loops=1)
+                      Output: lignes_commande.produit_id
+                      Buffers: shared hit=338
+Planning Time: 0.065 ms
+Execution Time: 1021.025 ms

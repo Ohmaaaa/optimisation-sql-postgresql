@@ -1,0 +1,15 @@
+GroupAggregate  (cost=1180.58..1422.57 rows=12099 width=16) (actual time=1.253..1.817 rows=41 loops=1)
+  Output: (date_trunc('month'::text, date_commande)), count(*)
+  Group Key: (date_trunc('month'::text, commandes.date_commande))
+  Buffers: shared hit=37
+  ->  Sort  (cost=1180.58..1210.83 rows=12100 width=8) (actual time=1.236..1.435 rows=12534 loops=1)
+        Output: (date_trunc('month'::text, date_commande))
+        Sort Key: (date_trunc('month'::text, commandes.date_commande))
+        Sort Method: quicksort  Memory: 385kB
+        Buffers: shared hit=37
+        ->  Index Only Scan using idx_commandes_annulee on public.commandes  (cost=0.29..360.04 rows=12100 width=8) (actual time=0.005..0.997 rows=12534 loops=1)
+              Output: date_trunc('month'::text, date_commande)
+              Heap Fetches: 0
+              Buffers: shared hit=37
+Planning Time: 0.045 ms
+Execution Time: 1.826 ms

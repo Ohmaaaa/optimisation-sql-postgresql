@@ -1,0 +1,16 @@
+GroupAggregate  (cost=5876.90..6129.73 rows=12641 width=16) (actual time=10.501..11.057 rows=41 loops=1)
+  Output: (date_trunc('month'::text, date_commande)), count(*)
+  Group Key: (date_trunc('month'::text, commandes.date_commande))
+  Buffers: shared hit=1859
+  ->  Sort  (cost=5876.90..5908.51 rows=12642 width=8) (actual time=10.482..10.681 rows=12534 loops=1)
+        Output: (date_trunc('month'::text, date_commande))
+        Sort Key: (date_trunc('month'::text, commandes.date_commande))
+        Sort Method: quicksort  Memory: 385kB
+        Buffers: shared hit=1859
+        ->  Seq Scan on public.commandes  (cost=0.00..5015.60 rows=12642 width=8) (actual time=0.006..9.978 rows=12534 loops=1)
+              Output: date_trunc('month'::text, date_commande)
+              Filter: (commandes.statut = 'annulee'::text)
+              Rows Removed by Filter: 237466
+              Buffers: shared hit=1859
+Planning Time: 0.057 ms
+Execution Time: 11.071 ms

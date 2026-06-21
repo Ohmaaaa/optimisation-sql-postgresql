@@ -1,0 +1,70 @@
+Finalize GroupAggregate  (cost=14007.95..14263.02 rows=2436 width=40) (actual time=15.290..27.537 rows=1 loops=1)
+  Output: (date_trunc('month'::text, co.date_commande)), sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise)))
+  Group Key: (date_trunc('month'::text, co.date_commande))
+  Buffers: shared hit=20001
+  ->  Gather Merge  (cost=14007.95..14215.73 rows=1433 width=40) (actual time=15.287..27.533 rows=1 loops=1)
+        Output: (date_trunc('month'::text, co.date_commande)), (PARTIAL sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise))))
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=20001
+        ->  Partial GroupAggregate  (cost=13007.94..13054.51 rows=1433 width=40) (actual time=5.939..5.941 rows=0 loops=2)
+              Output: (date_trunc('month'::text, co.date_commande)), PARTIAL sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise)))
+              Group Key: (date_trunc('month'::text, co.date_commande))
+              Buffers: shared hit=20001
+              Worker 0:  actual time=0.481..0.482 rows=0 loops=1
+                Buffers: shared hit=78
+              ->  Sort  (cost=13007.94..13011.52 rows=1433 width=21) (actual time=5.669..5.690 rows=1271 loops=2)
+                    Output: (date_trunc('month'::text, co.date_commande)), lc.quantite, lc.prix_unitaire, lc.remise
+                    Sort Key: (date_trunc('month'::text, co.date_commande))
+                    Sort Method: quicksort  Memory: 196kB
+                    Buffers: shared hit=20001
+                    Worker 0:  actual time=0.480..0.481 rows=0 loops=1
+                      Sort Method: quicksort  Memory: 25kB
+                      Buffers: shared hit=78
+                    ->  Hash Join  (cost=204.30..12932.81 rows=1433 width=21) (actual time=0.561..5.565 rows=1271 loops=2)
+                          Output: date_trunc('month'::text, co.date_commande), lc.quantite, lc.prix_unitaire, lc.remise
+                          Inner Unique: true
+                          Hash Cond: (lc.produit_id = p.id)
+                          Buffers: shared hit=19994
+                          Worker 0:  actual time=0.467..0.468 rows=0 loops=1
+                            Buffers: shared hit=71
+                          ->  Nested Loop  (cost=130.38..12818.25 rows=14104 width=25) (actual time=0.327..4.769 rows=11914 loops=2)
+                                Output: lc.quantite, lc.prix_unitaire, lc.remise, lc.produit_id, co.date_commande
+                                Buffers: shared hit=19867
+                                Worker 0:  actual time=0.126..0.126 rows=0 loops=1
+                                ->  Parallel Bitmap Heap Scan on public.commandes co  (cost=129.95..2041.92 rows=3531 width=12) (actual time=0.323..0.887 rows=2996 loops=2)
+                                      Output: co.id, co.client_id, co.date_commande, co.statut, co.canal
+                                      Recheck Cond: ((co.date_commande >= '2024-06-01'::date) AND (co.date_commande < '2024-07-01'::date))
+                                      Heap Blocks: exact=1784
+                                      Buffers: shared hit=1803
+                                      Worker 0:  actual time=0.125..0.126 rows=0 loops=1
+                                      ->  Bitmap Index Scan on idx_commandes_date  (cost=0.00..128.45 rows=6003 width=0) (actual time=0.389..0.390 rows=5993 loops=1)
+                                            Index Cond: ((co.date_commande >= '2024-06-01'::date) AND (co.date_commande < '2024-07-01'::date))
+                                            Buffers: shared hit=19
+                                ->  Index Only Scan using idx_lignes_couvrant on public.lignes_commande lc  (cost=0.42..3.00 rows=5 width=21) (actual time=0.001..0.001 rows=4 loops=5993)
+                                      Output: lc.commande_id, lc.produit_id, lc.quantite, lc.prix_unitaire, lc.remise
+                                      Index Cond: (lc.commande_id = co.id)
+                                      Heap Fetches: 0
+                                      Buffers: shared hit=18064
+                          ->  Hash  (cost=67.57..67.57 rows=508 width=4) (actual time=0.216..0.216 rows=508 loops=2)
+                                Output: p.id
+                                Buckets: 1024  Batches: 1  Memory Usage: 26kB
+                                Buffers: shared hit=113
+                                Worker 0:  actual time=0.320..0.320 rows=508 loops=1
+                                  Buffers: shared hit=57
+                                ->  Bitmap Heap Scan on public.produits p  (cost=8.22..67.57 rows=508 width=4) (actual time=0.096..0.190 rows=508 loops=2)
+                                      Output: p.id
+                                      Recheck Cond: (p.categorie = 'Informatique'::text)
+                                      Heap Blocks: exact=53
+                                      Buffers: shared hit=113
+                                      Worker 0:  actual time=0.161..0.292 rows=508 loops=1
+                                        Buffers: shared hit=57
+                                      ->  Bitmap Index Scan on idx_produits_categorie  (cost=0.00..8.09 rows=508 width=0) (actual time=0.023..0.023 rows=508 loops=2)
+                                            Index Cond: (p.categorie = 'Informatique'::text)
+                                            Buffers: shared hit=7
+                                            Worker 0:  actual time=0.028..0.028 rows=508 loops=1
+                                              Buffers: shared hit=4
+Planning:
+  Buffers: shared hit=22
+Planning Time: 0.207 ms
+Execution Time: 27.567 ms

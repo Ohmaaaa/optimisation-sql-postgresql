@@ -1,0 +1,28 @@
+GroupAggregate  (cost=42.02..42.27 rows=3 width=36) (actual time=0.012..0.013 rows=2 loops=1)
+  Output: co.id, sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise)))
+  Group Key: co.id
+  Buffers: shared hit=13
+  ->  Sort  (cost=42.02..42.05 rows=12 width=17) (actual time=0.009..0.009 rows=7 loops=1)
+        Output: co.id, lc.quantite, lc.prix_unitaire, lc.remise
+        Sort Key: co.id
+        Sort Method: quicksort  Memory: 25kB
+        Buffers: shared hit=13
+        ->  Nested Loop  (cost=4.87..41.81 rows=12 width=17) (actual time=0.005..0.007 rows=7 loops=1)
+              Output: co.id, lc.quantite, lc.prix_unitaire, lc.remise
+              Buffers: shared hit=13
+              ->  Bitmap Heap Scan on public.commandes co  (cost=4.44..16.12 rows=3 width=4) (actual time=0.003..0.004 rows=2 loops=1)
+                    Output: co.id, co.client_id, co.date_commande, co.statut, co.canal
+                    Recheck Cond: (co.client_id = 12345)
+                    Heap Blocks: exact=2
+                    Buffers: shared hit=5
+                    ->  Bitmap Index Scan on idx_commandes_client_id  (cost=0.00..4.44 rows=3 width=0) (actual time=0.001..0.001 rows=2 loops=1)
+                          Index Cond: (co.client_id = 12345)
+                          Buffers: shared hit=3
+              ->  Index Scan using idx_lignes_commande_id on public.lignes_commande lc  (cost=0.42..8.51 rows=5 width=17) (actual time=0.001..0.001 rows=4 loops=2)
+                    Output: lc.id, lc.commande_id, lc.produit_id, lc.quantite, lc.prix_unitaire, lc.remise
+                    Index Cond: (lc.commande_id = co.id)
+                    Buffers: shared hit=8
+Planning:
+  Buffers: shared hit=16
+Planning Time: 0.062 ms
+Execution Time: 0.022 ms

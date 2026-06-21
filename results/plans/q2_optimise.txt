@@ -1,0 +1,44 @@
+Finalize HashAggregate  (cost=7204.76..7221.55 rows=1679 width=19) (actual time=21.040..32.715 rows=1754 loops=1)
+  Output: c.id, c.nom, count(co.id)
+  Group Key: c.id
+  Batches: 1  Memory Usage: 193kB
+  Buffers: shared hit=3251
+  ->  Gather  (cost=7011.68..7196.37 rows=1679 width=19) (actual time=20.553..32.376 rows=2467 loops=1)
+        Output: c.id, c.nom, (PARTIAL count(co.id))
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=3251
+        ->  Partial HashAggregate  (cost=6011.68..6028.47 rows=1679 width=19) (actual time=13.338..13.402 rows=1234 loops=2)
+              Output: c.id, c.nom, PARTIAL count(co.id)
+              Group Key: c.id
+              Batches: 1  Memory Usage: 193kB
+              Buffers: shared hit=3251
+              Worker 0:  actual time=6.244..6.295 rows=983 loops=1
+                Batches: 1  Memory Usage: 129kB
+                Buffers: shared hit=482
+              ->  Parallel Hash Right Join  (cost=2283.70..5999.33 rows=2469 width=15) (actual time=3.191..13.077 rows=2293 loops=2)
+                    Output: c.id, c.nom, co.id
+                    Inner Unique: true
+                    Hash Cond: (co.client_id = c.id)
+                    Buffers: shared hit=3251
+                    Worker 0:  actual time=0.028..6.087 rows=1300 loops=1
+                      Buffers: shared hit=482
+                    ->  Parallel Seq Scan on public.commandes co  (cost=0.00..3329.59 rows=147059 width=8) (actual time=0.002..2.919 rows=125000 loops=2)
+                          Output: co.id, co.client_id, co.date_commande, co.statut, co.canal
+                          Buffers: shared hit=1859
+                          Worker 0:  actual time=0.004..1.775 rows=64361 loops=1
+                            Buffers: shared hit=479
+                    ->  Parallel Hash  (cost=2271.35..2271.35 rows=988 width=11) (actual time=3.148..3.148 rows=877 loops=2)
+                          Output: c.id, c.nom
+                          Buckets: 2048  Batches: 1  Memory Usage: 112kB
+                          Buffers: shared hit=1389
+                          Worker 0:  actual time=0.008..0.009 rows=0 loops=1
+                          ->  Parallel Seq Scan on public.clients c  (cost=0.00..2271.35 rows=988 width=11) (actual time=0.007..6.134 rows=1754 loops=1)
+                                Output: c.id, c.nom
+                                Filter: ((c.segment = 'vip'::text) AND (c.ville = 'Paris'::text))
+                                Rows Removed by Filter: 98246
+                                Buffers: shared hit=1389
+Planning:
+  Buffers: shared hit=16
+Planning Time: 0.134 ms
+Execution Time: 32.807 ms

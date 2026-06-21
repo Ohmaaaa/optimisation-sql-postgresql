@@ -1,0 +1,85 @@
+Finalize GroupAggregate  (cost=17907.98..18231.44 rows=2469 width=40) (actual time=40.323..53.530 rows=1 loops=1)
+  Output: (date_trunc('month'::text, co.date_commande)), sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise)))
+  Group Key: (date_trunc('month'::text, co.date_commande))
+  Buffers: shared hit=9461
+  ->  Gather Merge  (cost=17907.98..18178.97 rows=2058 width=40) (actual time=40.318..53.526 rows=3 loops=1)
+        Output: (date_trunc('month'::text, co.date_commande)), (PARTIAL sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise))))
+        Workers Planned: 2
+        Workers Launched: 2
+        Buffers: shared hit=9461
+        ->  Partial GroupAggregate  (cost=16907.96..16941.40 rows=1029 width=40) (actual time=28.925..28.927 rows=1 loops=3)
+              Output: (date_trunc('month'::text, co.date_commande)), PARTIAL sum((((lc.quantite)::numeric * lc.prix_unitaire) * ('1'::numeric - lc.remise)))
+              Group Key: (date_trunc('month'::text, co.date_commande))
+              Buffers: shared hit=9461
+              Worker 0:  actual time=23.345..23.347 rows=1 loops=1
+                Buffers: shared hit=2187
+              Worker 1:  actual time=23.273..23.274 rows=1 loops=1
+                Buffers: shared hit=2179
+              ->  Sort  (cost=16907.96..16910.53 rows=1029 width=21) (actual time=28.737..28.752 rows=847 loops=3)
+                    Output: (date_trunc('month'::text, co.date_commande)), lc.quantite, lc.prix_unitaire, lc.remise
+                    Sort Key: (date_trunc('month'::text, co.date_commande))
+                    Sort Method: quicksort  Memory: 93kB
+                    Buffers: shared hit=9461
+                    Worker 0:  actual time=23.193..23.205 rows=675 loops=1
+                      Sort Method: quicksort  Memory: 51kB
+                      Buffers: shared hit=2187
+                    Worker 1:  actual time=23.111..23.124 rows=727 loops=1
+                      Sort Method: quicksort  Memory: 53kB
+                      Buffers: shared hit=2179
+                    ->  Hash Join  (cost=4231.46..16856.47 rows=1029 width=21) (actual time=3.736..28.649 rows=847 loops=3)
+                          Output: date_trunc('month'::text, co.date_commande), lc.quantite, lc.prix_unitaire, lc.remise
+                          Inner Unique: true
+                          Hash Cond: (lc.produit_id = p.id)
+                          Buffers: shared hit=9389
+                          Worker 0:  actual time=0.516..23.104 rows=675 loops=1
+                            Buffers: shared hit=2151
+                          Worker 1:  actual time=0.478..23.017 rows=727 loops=1
+                            Buffers: shared hit=2143
+                          ->  Parallel Hash Join  (cost=4109.61..16705.45 rows=10124 width=25) (actual time=3.334..27.834 rows=7943 loops=3)
+                                Output: lc.quantite, lc.prix_unitaire, lc.remise, lc.produit_id, co.date_commande
+                                Inner Unique: true
+                                Hash Cond: (lc.commande_id = co.id)
+                                Buffers: shared hit=9202
+                                Worker 0:  actual time=0.034..22.248 rows=6636 loops=1
+                                  Buffers: shared hit=2084
+                                Worker 1:  actual time=0.024..22.184 rows=6576 loops=1
+                                  Buffers: shared hit=2076
+                                ->  Parallel Seq Scan on public.lignes_commande lc  (cost=0.00..11503.65 rows=416065 width=21) (actual time=0.004..8.433 rows=332852 loops=3)
+                                      Output: lc.id, lc.commande_id, lc.produit_id, lc.quantite, lc.prix_unitaire, lc.remise
+                                      Buffers: shared hit=7343
+                                      Worker 0:  actual time=0.006..7.865 rows=283332 loops=1
+                                        Buffers: shared hit=2084
+                                      Worker 1:  actual time=0.004..7.871 rows=282336 loops=1
+                                        Buffers: shared hit=2076
+                                ->  Parallel Hash  (cost=4064.88..4064.88 rows=3578 width=12) (actual time=3.298..3.298 rows=1998 loops=3)
+                                      Output: co.date_commande, co.id
+                                      Buckets: 8192  Batches: 1  Memory Usage: 352kB
+                                      Buffers: shared hit=1859
+                                      Worker 0:  actual time=0.008..0.009 rows=0 loops=1
+                                      Worker 1:  actual time=0.008..0.008 rows=0 loops=1
+                                      ->  Parallel Seq Scan on public.commandes co  (cost=0.00..4064.88 rows=3578 width=12) (actual time=0.004..9.415 rows=5993 loops=1)
+                                            Output: co.date_commande, co.id
+                                            Filter: ((co.date_commande >= '2024-06-01'::date) AND (co.date_commande < '2024-07-01'::date))
+                                            Rows Removed by Filter: 244007
+                                            Buffers: shared hit=1859
+                          ->  Hash  (cost=115.50..115.50 rows=508 width=4) (actual time=0.374..0.374 rows=508 loops=3)
+                                Output: p.id
+                                Buckets: 1024  Batches: 1  Memory Usage: 26kB
+                                Buffers: shared hit=159
+                                Worker 0:  actual time=0.454..0.454 rows=508 loops=1
+                                  Buffers: shared hit=53
+                                Worker 1:  actual time=0.427..0.427 rows=508 loops=1
+                                  Buffers: shared hit=53
+                                ->  Seq Scan on public.produits p  (cost=0.00..115.50 rows=508 width=4) (actual time=0.085..0.349 rows=508 loops=3)
+                                      Output: p.id
+                                      Filter: (p.categorie = 'Informatique'::text)
+                                      Rows Removed by Filter: 4492
+                                      Buffers: shared hit=159
+                                      Worker 0:  actual time=0.125..0.427 rows=508 loops=1
+                                        Buffers: shared hit=53
+                                      Worker 1:  actual time=0.125..0.401 rows=508 loops=1
+                                        Buffers: shared hit=53
+Planning:
+  Buffers: shared hit=14
+Planning Time: 0.154 ms
+Execution Time: 53.557 ms

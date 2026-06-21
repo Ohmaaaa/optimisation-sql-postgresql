@@ -1,0 +1,17 @@
+Aggregate  (cost=2536.21..2536.22 rows=1 width=8) (actual time=3.522..3.522 rows=1 loops=1)
+  Output: count(*)
+  Buffers: shared hit=15054
+  ->  Nested Loop Anti Join  (cost=0.42..2536.21 rows=1 width=0) (actual time=3.522..3.522 rows=0 loops=1)
+        Buffers: shared hit=15054
+        ->  Seq Scan on public.produits p  (cost=0.00..103.00 rows=5000 width=4) (actual time=0.002..0.121 rows=5000 loops=1)
+              Output: p.id, p.nom, p.categorie, p.prix, p.cout, p.actif, p.date_ajout
+              Buffers: shared hit=53
+        ->  Index Only Scan using idx_lignes_produit_id on public.lignes_commande lc  (cost=0.42..4.61 rows=200 width=4) (actual time=0.001..0.001 rows=1 loops=5000)
+              Output: lc.produit_id
+              Index Cond: (lc.produit_id = p.id)
+              Heap Fetches: 0
+              Buffers: shared hit=15001
+Planning:
+  Buffers: shared hit=14
+Planning Time: 0.052 ms
+Execution Time: 3.529 ms
