@@ -9,6 +9,8 @@ Pour chaque requête lente : mesure de la baseline, lecture du plan
 matérialisée, partitionnement) puis mesure du gain. **Gains mesurés : de ×2 à
 ×25 000.**
 
+**▶ [Démo interactive (Streamlit)](https://optimisation-sql-postgreql.streamlit.app/)** &nbsp;·&nbsp; [Code source](https://github.com/Ohmaaaa/optimisation-sql-postgresql)
+
 <p align="center">
   <img src="results/figures/acceleration.png" alt="Facteur d'accélération par technique" width="780">
 </p>
